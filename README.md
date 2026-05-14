@@ -4,17 +4,19 @@
 
 `tts_http_server` 是 Neo-MoFox 的 TTS HTTP 协议入口。
 
-它只负责暴露统一的 HTTP Router 和 TTS provider registry，本身不实现具体的 TTS 合成逻辑。真正的语音合成由外部 provider 插件注册到 registry 后提供，例如 `qwen_tts_provider`。
+它负责暴露统一的 HTTP Router、TTS provider registry，以及供其他 chatter 调用的 `generate_voice` action，本身不实现具体的 TTS 合成逻辑。真正的语音合成由外部 provider 插件注册到 registry 后提供，例如 `qwen_tts_provider`。
 
 ## 提供的组件
 
 - `tts_http_server:router:tts_http_server`
 - `tts_http_server:service:tts_provider_registry`
+- `tts_http_server:action:generate_voice`
 
 其中：
 
 - router 暴露统一 HTTP 协议
 - registry service 管理可用 TTS provider 及默认 provider
+- generate_voice action 供普通 chatter 直接合成并发送语音，且不会在 `voice_chatter` 中激活
 
 ## HTTP 接口
 

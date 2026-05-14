@@ -6,7 +6,7 @@ from typing import Any
 
 from src.core.components.base.service import BaseService
 
-from .protocol import TTSProvider
+from .protocol import TTSProvider, TTSSynthesisRequest, TTSSynthesisResponse
 
 
 _PROVIDERS: dict[str, TTSProvider] = {}
@@ -47,6 +47,18 @@ class TTSProviderRegistryService(BaseService):
         if not name:
             return None
         return _PROVIDERS.get(name)
+
+    async def synthesize(
+        self,
+        request: TTSSynthesisRequest,
+    ) -> TTSSynthesisResponse:
+        """按请求选择 provider 并执行语音合成。"""
+
+        provider_name = str(request.options.get("provider") or "").strip() or None
+        provider = self.get_provider(provider_name)
+        if provider is None:
+            raise LookupError("no TTS provider registered")
+        return await provider.synthesize(request)
 
     def list_providers(self) -> dict[str, Any]:
         """列出 provider 状态。"""

@@ -3,6 +3,8 @@
     "version": "1.0.0",
     "description": "TTS HTTP 协议服务器，只负责暴露 HTTP Router，具体 TTS 由其他插件注册 provider 实现",
     "author": "MoFox Team",
+    "categories": ["tool"],
+    "tags": ["tts", "http", "server", "router"],
     "dependencies": {
         "plugins": [],
         "components": []

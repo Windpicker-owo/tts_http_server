@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 from fastapi import HTTPException
 
@@ -52,7 +52,8 @@ class TTSHttpServerRouter(BaseRouter):
             if not text:
                 raise HTTPException(status_code=400, detail="text is required")
 
-            options = payload.get("options") if isinstance(payload.get("options"), dict) else {}
+            raw_options = payload.get("options")
+            options = cast(dict[str, Any], raw_options) if isinstance(raw_options, dict) else {}
             provider_name = str(options.get("provider") or "").strip() or None
             registry = self._get_registry()
             provider = registry.get_provider(provider_name)
@@ -66,15 +67,17 @@ class TTSHttpServerRouter(BaseRouter):
                     },
                 )
 
+            raw_markers = payload.get("markers")
+            markers = cast(dict[str, Any], raw_markers) if isinstance(raw_markers, dict) else {}
             request = TTSSynthesisRequest(
                 stream_id=str(payload.get("stream_id") or ""),
                 text=text,
                 emotion=payload.get("emotion") if isinstance(payload.get("emotion"), str) else None,
-                markers=payload.get("markers") if isinstance(payload.get("markers"), dict) else {},
+                markers=markers,
                 options=options,
             )
             try:
-                result = await provider.synthesize(request)
+                result = await registry.synthesize(request)
             except Exception as error:
                 raise HTTPException(
                     status_code=502,

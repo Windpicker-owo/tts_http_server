@@ -5,6 +5,7 @@ from __future__ import annotations
 from src.core.components.base.plugin import BasePlugin
 from src.core.components.loader import register_plugin
 
+from .action import GenerateVoiceAction
 from .router import TTSHttpServerRouter
 from .service import TTSProviderRegistryService
 
@@ -20,7 +21,7 @@ class TTSHttpServerPlugin(BasePlugin):
     def get_components(self) -> list[type]:
         """返回插件组件。"""
 
-        return [TTSHttpServerRouter, TTSProviderRegistryService]
+        return [GenerateVoiceAction, TTSHttpServerRouter, TTSProviderRegistryService]
 
 
 __all__ = ["TTSHttpServerPlugin"]
