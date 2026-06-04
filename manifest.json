@@ -1,7 +1,7 @@
 {
     "name": "tts_http_server",
     "display_name": "TTS HTTP 服务器",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "TTS HTTP 协议服务器，只负责暴露 HTTP Router，具体 TTS 由其他插件注册 provider 实现",
     "author": "MoFox Team",
     "categories": ["tool"],
@@ -22,6 +22,10 @@
             "dependencies": []
         }
     ],
+    "python_dependencies": [
+        "scipy>=1.16.0"
+    ],
+    "dependencies_required": true,
     "entry_point": "plugin.py",
     "min_core_version": "1.0.0"
 }

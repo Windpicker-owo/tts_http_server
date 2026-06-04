@@ -25,7 +25,17 @@ class GenerateVoiceAction(BaseAction):
     dependencies = ["tts_http_server:service:tts_provider_registry"]
 
     async def go_activate(self) -> bool:
-        """在 voice_chatter 中禁用该动作。"""
+        """根据配置和 chatter 类型决定是否激活该动作。"""
+
+        plugin_config = getattr(self.plugin, "config", None)
+        if plugin_config is not None:
+            expose_action = getattr(
+                getattr(plugin_config, "action", None),
+                "expose_generate_voice_action",
+                False,
+            )
+            if not expose_action:
+                return False
 
         active_chatter = get_chatter_manager().get_chatter_by_stream(
             self.chat_stream.stream_id

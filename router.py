@@ -7,10 +7,22 @@ from typing import Any, cast
 from fastapi import HTTPException
 
 from src.core.components.base.router import BaseRouter
+from src.app.plugin_system.api.log_api import get_logger
 
 from .protocol import TTS_PROTOCOL_VERSION, TTSSynthesisRequest
 from .service import TTSProviderRegistryService
 
+logger = get_logger("TTSHttpServerRouter")
+
+
+def _build_synthesis_error_detail(provider_name: str, error: Exception) -> dict[str, Any]:
+    error_message = str(error).strip() or repr(error)
+    return {
+        "message": "TTS provider synthesis failed",
+        "provider": provider_name,
+        "error": error_message,
+        "error_type": type(error).__name__,
+    }
 
 class TTSHttpServerRouter(BaseRouter):
     """TTS HTTP 协议路由。"""
@@ -49,6 +61,8 @@ class TTSHttpServerRouter(BaseRouter):
                 raise HTTPException(status_code=400, detail="unsupported TTS protocol")
 
             text = str(payload.get("text") or "").strip()
+            logger.debug("接受到 TTS 合成请求", extra={"text": text, "payload": payload})
+            
             if not text:
                 raise HTTPException(status_code=400, detail="text is required")
 
@@ -79,13 +93,21 @@ class TTSHttpServerRouter(BaseRouter):
             try:
                 result = await registry.synthesize(request)
             except Exception as error:
+                logger.error(
+                    "TTS provider synthesis failed",
+                    exc_info=error,
+                    extra={
+                        "provider": getattr(provider, "provider_name", provider_name or ""),
+                        "text": text,
+                        "options": options,
+                    },
+                )
                 raise HTTPException(
                     status_code=502,
-                    detail={
-                        "message": "TTS provider synthesis failed",
-                        "provider": getattr(provider, "provider_name", provider_name or ""),
-                        "error": str(error),
-                    },
+                    detail=_build_synthesis_error_detail(
+                        getattr(provider, "provider_name", provider_name or ""),
+                        error,
+                    ),
                 ) from error
             return {
                 "protocol": TTS_PROTOCOL_VERSION,
@@ -100,4 +122,4 @@ class TTSHttpServerRouter(BaseRouter):
             }
 
 
-__all__ = ["TTSHttpServerRouter"]
+__all__ = ["TTSHttpServerRouter", "_build_synthesis_error_detail"]
