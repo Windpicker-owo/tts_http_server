@@ -22,6 +22,7 @@ class GenerateVoiceAction(BaseAction):
         "适用于普通 chatter 在需要语音表达时调用；"
         "实时语音通话场景由 voice_chatter 自带动作处理，不要在那里调用此动作。"
     )
+    associated_types = ["voice"]
     dependencies = ["tts_http_server:service:tts_provider_registry"]
 
     async def go_activate(self) -> bool:
